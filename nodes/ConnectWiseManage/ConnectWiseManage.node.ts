@@ -30,7 +30,9 @@ export type SpecialOperation =
 	| 'listTypes' // Added
 	| 'listSubtypes' // Added
 	| 'listDocuments' // Added
-	| 'downloadDocument'; // Added
+	| 'downloadDocument'
+	| 'addTimeEntry'
+	| 'getTimeEntries'; // Added
 
 interface ICustomField {
 	id: string | number;
@@ -96,7 +98,38 @@ const resourceConfig: IResourceConfig = {
 						qs.orderBy = params.orderBy;
 					}
 					return qs;
+			addTimeEntry: {
+				method: Methods.POST,
+				endpoint: (id) => `service/tickets/${id}/timeentries`,
+				getBody: (params) => {
+					const body: IDataObject = {
+						timeStart: params.timeStart,
+						timeEnd: params.timeEnd,
+						actualHours: params.actualHours,
+						notes: params.notes,
+						billableOption: params.billableOption,
+						addToInternalAnalysisFlag: params.addToInternalAnalysisFlag === true,
+						addToDetailDescriptionFlag: params.addToDetailDescriptionFlag === true,
+						addToResolutionFlag: params.addToResolutionFlag === true,
+					};
+					if (params.memberId) body.member = { id: Number(params.memberId) };
+					if (params.workTypeId) body.workType = { id: Number(params.workTypeId) };
+					for (const k of Object.keys(body)) { if (body[k] === undefined || body[k] === '') delete body[k]; }
+					return body;
 				},
+			},
+			getTimeEntries: {
+				method: Methods.GET,
+				endpoint: (id) => `service/tickets/${id}/timeentries`,
+				getBody: (params) => {
+					const qs: IDataObject = {};
+					if (params.conditions) qs.conditions = params.conditions;
+					if (params.orderBy) qs.orderBy = params.orderBy;
+					if (!params.returnAll) { qs.page = params.page || 1; qs.pageSize = params.limit || 100; }
+					return qs;
+				},
+			},
+},
 			},
 			addNote: {
 				method: Methods.POST,
@@ -502,8 +535,9 @@ export class ConnectWiseManage implements INodeType {
 				'listTypes', // Added
 				'listSubtypes', // Added
 				'listDocuments', // Added
-				'downloadDocument', // Added
-			].includes(op);
+				'downloadDocument', // Added,
+				'addTimeEntry',
+				'getTimeEntries'].includes(op);
 
 		const isStandardOperation = (op: string): op is StandardOperation =>
 			[
