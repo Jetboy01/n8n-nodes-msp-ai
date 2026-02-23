@@ -25,6 +25,19 @@ export const ticketProperties: INodeProperties[] = [
 				action: 'Add a note to a ticket',
 			},
 			{
+				name: 'Add Time Entry',
+				value: 'addTimeEntry',
+				description: 'Add a time entry to a ticket',
+				action: 'Add a time entry to a ticket',
+			},
+			{
+				name: 'Get Time Entries',
+				value: 'getTimeEntries',
+				description: 'List time entries for a ticket',
+				action: 'Get time entries for a ticket',
+			},
+
+			{
 				name: 'Create',
 				value: 'create',
 				description: 'Create a ticket',
@@ -221,8 +234,7 @@ export const ticketProperties: INodeProperties[] = [
 					'getCustomField',
 					'updateCustomField',
 					'listDocuments', // Added
-					'getConfigurations',
-				],
+					'getConfigurations',],
 			},
 		},
 		description: 'The ID of the ticket',
@@ -522,5 +534,207 @@ export const ticketProperties: INodeProperties[] = [
 			},
 			// Add other relevant fields as needed
 		],
+	},
+
+	// Fields for Add Time Entry
+	{
+		displayName: 'Time Start',
+		name: 'timeStart',
+		type: 'string' as NodePropertyTypes,
+		default: '',
+		required: true,
+		displayOptions: {
+			show: {
+				resource: ['ticket'],
+				operation: ['addTimeEntry'],
+			},
+		},
+		description: 'ISO 8601 start time (e.g., 2026-02-23T15:00:00Z)',
+	},
+	{
+		displayName: 'Time End',
+		name: 'timeEnd',
+		type: 'string' as NodePropertyTypes,
+		default: '',
+		displayOptions: {
+			show: {
+				resource: ['ticket'],
+				operation: ['addTimeEntry'],
+			},
+		},
+		description: 'ISO 8601 end time; optional if Actual Hours is provided',
+	},
+	{
+		displayName: 'Actual Hours',
+		name: 'actualHours',
+		type: 'number' as NodePropertyTypes,
+		default: 0,
+		typeOptions: { numberPrecision: 2, minValue: 0 },
+		displayOptions: {
+			show: {
+				resource: ['ticket'],
+				operation: ['addTimeEntry'],
+			},
+		},
+		description: 'Duration in hours (e.g., 0.75). Optional if Time End is provided',
+	},
+	{
+		displayName: 'Notes',
+		name: 'notes',
+		type: 'string' as NodePropertyTypes,
+		typeOptions: { rows: 4 },
+		default: '',
+		displayOptions: {
+			show: {
+				resource: ['ticket'],
+				operation: ['addTimeEntry'],
+			},
+		},
+		description: 'Text notes to include with the time entry',
+	},
+	{
+		displayName: 'Billable Option',
+		name: 'billableOption',
+		type: 'options' as NodePropertyTypes,
+		options: [
+			{ name: 'Billable', value: 'Billable' },
+			{ name: 'Do Not Bill', value: 'DoNotBill' },
+			{ name: 'No Charge', value: 'NoCharge' },
+			{ name: 'No Default', value: 'NoDefault' },
+		],
+		default: 'Billable',
+		displayOptions: {
+			show: {
+				resource: ['ticket'],
+				operation: ['addTimeEntry'],
+			},
+		},
+		description: 'Billing option for the time entry',
+	},
+	{
+		displayName: 'Member ID',
+		name: 'memberId',
+		type: 'number' as NodePropertyTypes,
+		default: 0,
+		typeOptions: { numberPrecision: 0, minValue: 1 },
+		displayOptions: {
+			show: {
+				resource: ['ticket'],
+				operation: ['addTimeEntry'],
+			},
+		},
+		description: 'Member (technician) ID for this time entry',
+	},
+	{
+		displayName: 'Work Type ID',
+		name: 'workTypeId',
+		type: 'number' as NodePropertyTypes,
+		default: 0,
+		typeOptions: { numberPrecision: 0, minValue: 1 },
+		displayOptions: {
+			show: {
+				resource: ['ticket'],
+				operation: ['addTimeEntry'],
+			},
+		},
+		description: 'Work type ID for categorising the time',
+	},
+	{
+		displayName: 'Add to Internal (Analysis) Tab',
+		name: 'addToInternalAnalysisFlag',
+		type: 'boolean' as NodePropertyTypes,
+		default: true,
+		displayOptions: {
+			show: {
+				resource: ['ticket'],
+				operation: ['addTimeEntry'],
+			},
+		},
+		description: 'Also place the notes text into the Internal tab',
+	},
+	{
+		displayName: 'Add to Discussion (Detail) Tab',
+		name: 'addToDetailDescriptionFlag',
+		type: 'boolean' as NodePropertyTypes,
+		default: false,
+		displayOptions: {
+			show: {
+				resource: ['ticket'],
+				operation: ['addTimeEntry'],
+			},
+		},
+		description: 'Also place the notes text into the Discussion tab',
+	},
+	{
+		displayName: 'Add to Resolution Tab',
+		name: 'addToResolutionFlag',
+		type: 'boolean' as NodePropertyTypes,
+		default: false,
+		displayOptions: {
+			show: {
+				resource: ['ticket'],
+				operation: ['addTimeEntry'],
+			},
+		},
+		description: 'Also place the notes text into the Resolution tab',
+	},
+
+	// Fields for Get Time Entries
+	{
+		displayName: 'Return All',
+		name: 'returnAll',
+		type: 'boolean' as NodePropertyTypes,
+		default: false,
+		displayOptions: {
+			show: {
+				resource: ['ticket'],
+				operation: ['getTimeEntries'],
+			},
+		},
+		description: 'Whether to return all results or only up to a given limit',
+	},
+	{
+		displayName: 'Limit',
+		name: 'limit',
+		type: 'number' as NodePropertyTypes,
+		default: 100,
+		typeOptions: { minValue: 1, maxValue: 1000 },
+		displayOptions: {
+			show: {
+				resource: ['ticket'],
+				operation: ['getTimeEntries'],
+				returnAll: [false],
+			},
+		},
+		description: 'Max number of results to return',
+	},
+	{
+		displayName: 'Page',
+		name: 'page',
+		type: 'number' as NodePropertyTypes,
+		default: 1,
+		typeOptions: { minValue: 1, numberPrecision: 0 },
+		displayOptions: {
+			show: {
+				resource: ['ticket'],
+				operation: ['getTimeEntries'],
+				returnAll: [false],
+			},
+		},
+		description: 'Page number when not returning all results',
+	},
+	{
+		displayName: 'Conditions',
+		name: 'conditions',
+		type: 'string' as NodePropertyTypes,
+		default: '',
+		displayOptions: {
+			show: {
+				resource: ['ticket'],
+				operation: ['getTimeEntries'],
+			},
+		},
+		placeholder: "member/id=42 and billableOption='Billable'",
+		description: 'ConnectWise conditions to filter time entries',
 	},
 ];
